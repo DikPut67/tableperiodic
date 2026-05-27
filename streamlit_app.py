@@ -55,6 +55,11 @@ ELEMENTS = [
      "atomic_mass": 226.0,    "boiling_point": 1737,   "melting_point": 700,
      "density": 5.5,        "oxidation_states": "+2",                    "electron_config": "[Rn] 7s²"},
 
+    # === GOLONGAN 3B (Logam Transisi) ===
+    {"symbol": "Sc", "name": "Skandium", "atomic_number": 21, "gruop": "3B", "period": 4,
+    "atomic_mass": 44.956,   "boiling_point": 2730,   "melting_point": 1539,
+     "density": 3.0,       "oxidation_states": "+3", "electron_config": "[Ar] 3d¹ 4s²"}
+
     # === GOLONGAN 3A (Golongan Boron) ===
     {"symbol": "B",  "name": "Boron",       "atomic_number": 5,   "group": "3A", "period": 2,
      "atomic_mass": 10.811,   "boiling_point": 2550,   "melting_point": 2075,
@@ -185,6 +190,7 @@ ELEMENTS = [
 GROUP_COLORS = {
     "1A": "#ef5350",   # Merah  - Alkali
     "2A": "#ff7043",   # Oranye - Alkali Tanah
+    "3B": "#bababa",   # Silver - Logam Transisi
     "3A": "#fdd835",   # Kuning - Boron
     "4A": "#66bb6a",   # Hijau  - Karbon
     "5A": "#29b6f6",   # Biru   - Nitrogen
@@ -193,7 +199,7 @@ GROUP_COLORS = {
     "8A": "#78909c",   # Abu    - Gas Mulia
 }
 GROUP_TEXT_COLORS = {
-    "1A": "#fff", "2A": "#fff", "3A": "#222",
+    "1A": "#fff", "2A": "#fff", "3A": "#222", "3B": "#222"
     "4A": "#fff", "5A": "#fff", "6A": "#fff",
     "7A": "#fff", "8A": "#fff",
 }
@@ -201,6 +207,7 @@ GROUP_NAMES = {
     "1A": "Logam Alkali",
     "2A": "Logam Alkali Tanah",
     "3A": "Golongan Boron",
+    "3B": "Logam Transisi"
     "4A": "Golongan Karbon",
     "5A": "Golongan Nitrogen",
     "6A": "Kalkogen",
@@ -208,7 +215,7 @@ GROUP_NAMES = {
     "8A": "Gas Mulia",
 }
 
-GROUPS  = ["1A", "2A", "3A", "4A", "5A", "6A", "7A", "8A"]
+GROUPS  = ["1A", "2A", "3A", "3B", "4A", "5A", "6A", "7A", "8A"]
 PERIODS = [1, 2, 3, 4, 5, 6, 7]
 
 # Build lookup dict  {(period, group): element}
