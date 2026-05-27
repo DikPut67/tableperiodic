@@ -58,7 +58,7 @@ ELEMENTS = [
     # === GOLONGAN 3B (Logam Transisi) ===
     {"symbol": "Sc", "name": "Skandium", "atomic_number": 21, "gruop": "3B", "period": 4,
     "atomic_mass": 44.956,   "boiling_point": 2730,   "melting_point": 1539,
-     "density": 3.0,       "oxidation_states": "+3", "electron_config": "[Ar] 3d¹ 4s²"}
+     "density": 3.0,       "oxidation_states": "+3", "electron_config": "[Ar] 3d¹ 4s²"},
 
     # === GOLONGAN 3A (Golongan Boron) ===
     {"symbol": "B",  "name": "Boron",       "atomic_number": 5,   "group": "3A", "period": 2,
