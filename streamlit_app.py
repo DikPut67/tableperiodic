@@ -199,7 +199,7 @@ GROUP_COLORS = {
     "8A": "#78909c",   # Abu    - Gas Mulia
 }
 GROUP_TEXT_COLORS = {
-    "1A": "#fff", "2A": "#fff", "3A": "#222", "3B": "#222"
+    "1A": "#fff", "2A": "#fff", "3A": "#222", "3B": "#222",
     "4A": "#fff", "5A": "#fff", "6A": "#fff",
     "7A": "#fff", "8A": "#fff",
 }
