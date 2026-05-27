@@ -207,7 +207,7 @@ GROUP_NAMES = {
     "1A": "Logam Alkali",
     "2A": "Logam Alkali Tanah",
     "3A": "Golongan Boron",
-    "3B": "Logam Transisi"
+    "3B": "Logam Transisi",
     "4A": "Golongan Karbon",
     "5A": "Golongan Nitrogen",
     "6A": "Kalkogen",
