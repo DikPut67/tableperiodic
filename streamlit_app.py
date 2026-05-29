@@ -1,535 +1,508 @@
 import streamlit as st
-import pandas as pd
+import streamlit.components.v1 as components
+import json
 
 st.set_page_config(
-    page_title="Tabel Periodik Unsur Kimia",
-    layout="wide",
-    page_icon="⚗️",
-    initial_sidebar_state="collapsed"
+    page_title="Tabel Periodik Kimia",
+    page_icon="⚛️",
+    layout="wide"
 )
 
-# ============================================================
-# DATA UNSUR KIMIA (Golongan 1A - 8A)
-# ============================================================
+# ── Data Elemen ──────────────────────────────────────────────────────────────
 ELEMENTS = [
-    # === GOLONGAN 1A (Logam Alkali + Hidrogen) ===
-    {"symbol": "H",  "name": "Hidrogen",    "atomic_number": 1,   "group": "1A", "period": 1,
-     "atomic_mass": 1.008,    "boiling_point": -252.9, "melting_point": -259.1,
-     "density": 0.0000899,  "oxidation_states": "+1, -1",                "electron_config": "1s¹"},
-    {"symbol": "Li", "name": "Litium",      "atomic_number": 3,   "group": "1A", "period": 2,
-     "atomic_mass": 6.941,    "boiling_point": 1342,   "melting_point": 180.5,
-     "density": 0.534,      "oxidation_states": "+1",                    "electron_config": "[He] 2s¹"},
-    {"symbol": "Na", "name": "Natrium",     "atomic_number": 11,  "group": "1A", "period": 3,
-     "atomic_mass": 22.990,   "boiling_point": 883,    "melting_point": 97.8,
-     "density": 0.971,      "oxidation_states": "+1",                    "electron_config": "[Ne] 3s¹"},
-    {"symbol": "K",  "name": "Kalium",      "atomic_number": 19,  "group": "1A", "period": 4,
-     "atomic_mass": 39.098,   "boiling_point": 759,    "melting_point": 63.5,
-     "density": 0.862,      "oxidation_states": "+1",                    "electron_config": "[Ar] 4s¹"},
-    {"symbol": "Rb", "name": "Rubidium",    "atomic_number": 37,  "group": "1A", "period": 5,
-     "atomic_mass": 85.468,   "boiling_point": 688,    "melting_point": 39.3,
-     "density": 1.532,      "oxidation_states": "+1",                    "electron_config": "[Kr] 5s¹"},
-    {"symbol": "Cs", "name": "Sesium",      "atomic_number": 55,  "group": "1A", "period": 6,
-     "atomic_mass": 132.905,  "boiling_point": 671,    "melting_point": 28.5,
-     "density": 1.873,      "oxidation_states": "+1",                    "electron_config": "[Xe] 6s¹"},
-    {"symbol": "Fr", "name": "Fransium",    "atomic_number": 87,  "group": "1A", "period": 7,
-     "atomic_mass": 223.0,    "boiling_point": 677,    "melting_point": 27.0,
-     "density": 1.87,       "oxidation_states": "+1",                    "electron_config": "[Rn] 7s¹"},
-
-    # === GOLONGAN 2A (Logam Alkali Tanah) ===
-    {"symbol": "Be", "name": "Berilium",    "atomic_number": 4,   "group": "2A", "period": 2,
-     "atomic_mass": 9.012,    "boiling_point": 2470,   "melting_point": 1287,
-     "density": 1.848,      "oxidation_states": "+2",                    "electron_config": "[He] 2s²"},
-    {"symbol": "Mg", "name": "Magnesium",   "atomic_number": 12,  "group": "2A", "period": 3,
-     "atomic_mass": 24.305,   "boiling_point": 1090,   "melting_point": 650,
-     "density": 1.738,      "oxidation_states": "+2",                    "electron_config": "[Ne] 3s²"},
-    {"symbol": "Ca", "name": "Kalsium",     "atomic_number": 20,  "group": "2A", "period": 4,
-     "atomic_mass": 40.078,   "boiling_point": 1484,   "melting_point": 842,
-     "density": 1.55,       "oxidation_states": "+2",                    "electron_config": "[Ar] 4s²"},
-    {"symbol": "Sr", "name": "Stronsium",   "atomic_number": 38,  "group": "2A", "period": 5,
-     "atomic_mass": 87.62,    "boiling_point": 1377,   "melting_point": 777,
-     "density": 2.64,       "oxidation_states": "+2",                    "electron_config": "[Kr] 5s²"},
-    {"symbol": "Ba", "name": "Barium",      "atomic_number": 56,  "group": "2A", "period": 6,
-     "atomic_mass": 137.327,  "boiling_point": 1870,   "melting_point": 727,
-     "density": 3.594,      "oxidation_states": "+2",                    "electron_config": "[Xe] 6s²"},
-    {"symbol": "Ra", "name": "Radium",      "atomic_number": 88,  "group": "2A", "period": 7,
-     "atomic_mass": 226.0,    "boiling_point": 1737,   "melting_point": 700,
-     "density": 5.5,        "oxidation_states": "+2",                    "electron_config": "[Rn] 7s²"},
-
-    # === GOLONGAN 3B (Logam Transisi) ===
-    {"symbol": "Sc", "name": "Skandium", "atomic_number": 21, "gruop": "3B", "period": 4,
-    "atomic_mass": 44.956,   "boiling_point": 2730,   "melting_point": 1539,
-     "density": 3.0,       "oxidation_states": "+3", "electron_config": "[Ar] 3d¹ 4s²"},
-
-    # === GOLONGAN 3A (Golongan Boron) ===
-    {"symbol": "B",  "name": "Boron",       "atomic_number": 5,   "group": "3A", "period": 2,
-     "atomic_mass": 10.811,   "boiling_point": 2550,   "melting_point": 2075,
-     "density": 2.37,       "oxidation_states": "+3",                    "electron_config": "[He] 2s² 2p¹"},
-    {"symbol": "Al", "name": "Aluminium",   "atomic_number": 13,  "group": "3A", "period": 3,
-     "atomic_mass": 26.982,   "boiling_point": 2519,   "melting_point": 660.3,
-     "density": 2.698,      "oxidation_states": "+3",                    "electron_config": "[Ne] 3s² 3p¹"},
-    {"symbol": "Ga", "name": "Galium",      "atomic_number": 31,  "group": "3A", "period": 4,
-     "atomic_mass": 69.723,   "boiling_point": 2204,   "melting_point": 29.8,
-     "density": 5.907,      "oxidation_states": "+3, +1",               "electron_config": "[Ar] 3d¹⁰ 4s² 4p¹"},
-    {"symbol": "In", "name": "Indium",      "atomic_number": 49,  "group": "3A", "period": 5,
-     "atomic_mass": 114.818,  "boiling_point": 2072,   "melting_point": 156.6,
-     "density": 7.31,       "oxidation_states": "+3, +1",               "electron_config": "[Kr] 4d¹⁰ 5s² 5p¹"},
-    {"symbol": "Tl", "name": "Talium",      "atomic_number": 81,  "group": "3A", "period": 6,
-     "atomic_mass": 204.383,  "boiling_point": 1473,   "melting_point": 304,
-     "density": 11.85,      "oxidation_states": "+3, +1",               "electron_config": "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹"},
-    {"symbol": "Nh", "name": "Nihonium",    "atomic_number": 113, "group": "3A", "period": 7,
-     "atomic_mass": 286.0,    "boiling_point": 1130,   "melting_point": 430,
-     "density": 16.0,       "oxidation_states": "+3, +1",               "electron_config": "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹"},
-
-    # === GOLONGAN 4A (Golongan Karbon) ===
-    {"symbol": "C",  "name": "Karbon",      "atomic_number": 6,   "group": "4A", "period": 2,
-     "atomic_mass": 12.011,   "boiling_point": 4027,   "melting_point": 3642,
-     "density": 2.267,      "oxidation_states": "+4, +2, -4",           "electron_config": "[He] 2s² 2p²"},
-    {"symbol": "Si", "name": "Silikon",     "atomic_number": 14,  "group": "4A", "period": 3,
-     "atomic_mass": 28.086,   "boiling_point": 3265,   "melting_point": 1414,
-     "density": 2.329,      "oxidation_states": "+4, -4",               "electron_config": "[Ne] 3s² 3p²"},
-    {"symbol": "Ge", "name": "Germanium",   "atomic_number": 32,  "group": "4A", "period": 4,
-     "atomic_mass": 72.630,   "boiling_point": 2833,   "melting_point": 938.3,
-     "density": 5.323,      "oxidation_states": "+4, +2",               "electron_config": "[Ar] 3d¹⁰ 4s² 4p²"},
-    {"symbol": "Sn", "name": "Timah",       "atomic_number": 50,  "group": "4A", "period": 5,
-     "atomic_mass": 118.710,  "boiling_point": 2602,   "melting_point": 231.9,
-     "density": 7.265,      "oxidation_states": "+4, +2",               "electron_config": "[Kr] 4d¹⁰ 5s² 5p²"},
-    {"symbol": "Pb", "name": "Timbal",      "atomic_number": 82,  "group": "4A", "period": 6,
-     "atomic_mass": 207.2,    "boiling_point": 1749,   "melting_point": 327.5,
-     "density": 11.34,      "oxidation_states": "+4, +2",               "electron_config": "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²"},
-    {"symbol": "Fl", "name": "Flerovium",   "atomic_number": 114, "group": "4A", "period": 7,
-     "atomic_mass": 289.0,    "boiling_point": 210,    "melting_point": -73,
-     "density": 14.0,       "oxidation_states": "+4, +2",               "electron_config": "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²"},
-
-    # === GOLONGAN 5A (Golongan Nitrogen) ===
-    {"symbol": "N",  "name": "Nitrogen",    "atomic_number": 7,   "group": "5A", "period": 2,
-     "atomic_mass": 14.007,   "boiling_point": -195.8, "melting_point": -210,
-     "density": 0.001251,   "oxidation_states": "+5, +3, -3",           "electron_config": "[He] 2s² 2p³"},
-    {"symbol": "P",  "name": "Fosfor",      "atomic_number": 15,  "group": "5A", "period": 3,
-     "atomic_mass": 30.974,   "boiling_point": 280.5,  "melting_point": 44.2,
-     "density": 1.82,       "oxidation_states": "+5, +3, -3",           "electron_config": "[Ne] 3s² 3p³"},
-    {"symbol": "As", "name": "Arsen",       "atomic_number": 33,  "group": "5A", "period": 4,
-     "atomic_mass": 74.922,   "boiling_point": 887,    "melting_point": 817,
-     "density": 5.727,      "oxidation_states": "+5, +3, -3",           "electron_config": "[Ar] 3d¹⁰ 4s² 4p³"},
-    {"symbol": "Sb", "name": "Antimon",     "atomic_number": 51,  "group": "5A", "period": 5,
-     "atomic_mass": 121.760,  "boiling_point": 1587,   "melting_point": 630.6,
-     "density": 6.685,      "oxidation_states": "+5, +3, -3",           "electron_config": "[Kr] 4d¹⁰ 5s² 5p³"},
-    {"symbol": "Bi", "name": "Bismut",      "atomic_number": 83,  "group": "5A", "period": 6,
-     "atomic_mass": 208.980,  "boiling_point": 1564,   "melting_point": 271.5,
-     "density": 9.807,      "oxidation_states": "+5, +3",               "electron_config": "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³"},
-    {"symbol": "Mc", "name": "Moscovium",   "atomic_number": 115, "group": "5A", "period": 7,
-     "atomic_mass": 290.0,    "boiling_point": 1400,   "melting_point": 400,
-     "density": 13.5,       "oxidation_states": "+3, +1",               "electron_config": "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³"},
-
-    # === GOLONGAN 6A (Kalkogen) ===
-    {"symbol": "O",  "name": "Oksigen",     "atomic_number": 8,   "group": "6A", "period": 2,
-     "atomic_mass": 15.999,   "boiling_point": -183,   "melting_point": -218.8,
-     "density": 0.001429,   "oxidation_states": "-2, -1",               "electron_config": "[He] 2s² 2p⁴"},
-    {"symbol": "S",  "name": "Sulfur",      "atomic_number": 16,  "group": "6A", "period": 3,
-     "atomic_mass": 32.06,    "boiling_point": 444.6,  "melting_point": 115.2,
-     "density": 2.067,      "oxidation_states": "+6, +4, -2",           "electron_config": "[Ne] 3s² 3p⁴"},
-    {"symbol": "Se", "name": "Selenium",    "atomic_number": 34,  "group": "6A", "period": 4,
-     "atomic_mass": 78.971,   "boiling_point": 685,    "melting_point": 221,
-     "density": 4.819,      "oxidation_states": "+6, +4, -2",           "electron_config": "[Ar] 3d¹⁰ 4s² 4p⁴"},
-    {"symbol": "Te", "name": "Telurium",    "atomic_number": 52,  "group": "6A", "period": 5,
-     "atomic_mass": 127.60,   "boiling_point": 988,    "melting_point": 449.5,
-     "density": 6.232,      "oxidation_states": "+6, +4, -2",           "electron_config": "[Kr] 4d¹⁰ 5s² 5p⁴"},
-    {"symbol": "Po", "name": "Polonium",    "atomic_number": 84,  "group": "6A", "period": 6,
-     "atomic_mass": 209.0,    "boiling_point": 962,    "melting_point": 254,
-     "density": 9.196,      "oxidation_states": "+6, +4, +2, -2",       "electron_config": "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴"},
-    {"symbol": "Lv", "name": "Livermorium", "atomic_number": 116, "group": "6A", "period": 7,
-     "atomic_mass": 293.0,    "boiling_point": 800,    "melting_point": 400,
-     "density": 12.9,       "oxidation_states": "+4, +2, -2",           "electron_config": "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴"},
-
-    # === GOLONGAN 7A (Halogen) ===
-    {"symbol": "F",  "name": "Fluor",       "atomic_number": 9,   "group": "7A", "period": 2,
-     "atomic_mass": 18.998,   "boiling_point": -188.1, "melting_point": -219.7,
-     "density": 0.001696,   "oxidation_states": "-1",                   "electron_config": "[He] 2s² 2p⁵"},
-    {"symbol": "Cl", "name": "Klor",        "atomic_number": 17,  "group": "7A", "period": 3,
-     "atomic_mass": 35.45,    "boiling_point": -34.1,  "melting_point": -100.98,
-     "density": 0.003214,   "oxidation_states": "+7, +5, +3, +1, -1",  "electron_config": "[Ne] 3s² 3p⁵"},
-    {"symbol": "Br", "name": "Brom",        "atomic_number": 35,  "group": "7A", "period": 4,
-     "atomic_mass": 79.904,   "boiling_point": 59,     "melting_point": -7.2,
-     "density": 3.122,      "oxidation_states": "+7, +5, +3, +1, -1",  "electron_config": "[Ar] 3d¹⁰ 4s² 4p⁵"},
-    {"symbol": "I",  "name": "Iodin",       "atomic_number": 53,  "group": "7A", "period": 5,
-     "atomic_mass": 126.904,  "boiling_point": 184.3,  "melting_point": 113.7,
-     "density": 4.933,      "oxidation_states": "+7, +5, +1, -1",       "electron_config": "[Kr] 4d¹⁰ 5s² 5p⁵"},
-    {"symbol": "At", "name": "Astatin",     "atomic_number": 85,  "group": "7A", "period": 6,
-     "atomic_mass": 210.0,    "boiling_point": 337,    "melting_point": 302,
-     "density": 7.0,        "oxidation_states": "+7, +5, +3, +1, -1",  "electron_config": "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵"},
-    {"symbol": "Ts", "name": "Tennesin",    "atomic_number": 117, "group": "7A", "period": 7,
-     "atomic_mass": 294.0,    "boiling_point": 883,    "melting_point": 350,
-     "density": 7.1,        "oxidation_states": "+5, +3, +1, -1",       "electron_config": "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵"},
-
-    # === GOLONGAN 8A (Gas Mulia) ===
-    {"symbol": "He", "name": "Helium",      "atomic_number": 2,   "group": "8A", "period": 1,
-     "atomic_mass": 4.003,    "boiling_point": -268.9, "melting_point": -272.2,
-     "density": 0.0001785,  "oxidation_states": "0",                    "electron_config": "1s²"},
-    {"symbol": "Ne", "name": "Neon",        "atomic_number": 10,  "group": "8A", "period": 2,
-     "atomic_mass": 20.180,   "boiling_point": -246.1, "melting_point": -248.6,
-     "density": 0.0009002,  "oxidation_states": "0",                    "electron_config": "[He] 2s² 2p⁶"},
-    {"symbol": "Ar", "name": "Argon",       "atomic_number": 18,  "group": "8A", "period": 3,
-     "atomic_mass": 39.948,   "boiling_point": -185.8, "melting_point": -189.4,
-     "density": 0.001784,   "oxidation_states": "0",                    "electron_config": "[Ne] 3s² 3p⁶"},
-    {"symbol": "Kr", "name": "Kripton",     "atomic_number": 36,  "group": "8A", "period": 4,
-     "atomic_mass": 83.798,   "boiling_point": -153.2, "melting_point": -157.4,
-     "density": 0.003733,   "oxidation_states": "0, +2",                "electron_config": "[Ar] 3d¹⁰ 4s² 4p⁶"},
-    {"symbol": "Xe", "name": "Xenon",       "atomic_number": 54,  "group": "8A", "period": 5,
-     "atomic_mass": 131.293,  "boiling_point": -108.1, "melting_point": -111.8,
-     "density": 0.005894,   "oxidation_states": "0, +2, +4, +6, +8",   "electron_config": "[Kr] 4d¹⁰ 5s² 5p⁶"},
-    {"symbol": "Rn", "name": "Radon",       "atomic_number": 86,  "group": "8A", "period": 6,
-     "atomic_mass": 222.0,    "boiling_point": -61.7,  "melting_point": -71,
-     "density": 0.00973,    "oxidation_states": "0, +2",                "electron_config": "[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶"},
-    {"symbol": "Og", "name": "Oganesson",   "atomic_number": 118, "group": "8A", "period": 7,
-     "atomic_mass": 294.0,    "boiling_point": 80,     "melting_point": 52,
-     "density": 4.9,        "oxidation_states": "0, +2, +4, +6",        "electron_config": "[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶"},
+    dict(n=1,  sym="H",  name="Hidrogen",       cat="nonmetal",   mass="1.008",  period=1, group=1,  config="1s¹",                    phase="Gas",   en="2.20", radius="53",  bp="-252.9°C", mp="-259.1°C"),
+    dict(n=2,  sym="He", name="Helium",          cat="noble",      mass="4.003",  period=1, group=18, config="1s²",                    phase="Gas",   en="—",    radius="31",  bp="-268.9°C", mp="—"),
+    dict(n=3,  sym="Li", name="Litium",          cat="alkali",     mass="6.941",  period=2, group=1,  config="[He] 2s¹",               phase="Padat", en="0.98", radius="167", bp="1342°C",   mp="180.5°C"),
+    dict(n=4,  sym="Be", name="Berilium",        cat="alkaline",   mass="9.012",  period=2, group=2,  config="[He] 2s²",               phase="Padat", en="1.57", radius="112", bp="2470°C",   mp="1287°C"),
+    dict(n=5,  sym="B",  name="Boron",           cat="metalloid",  mass="10.81",  period=2, group=13, config="[He] 2s² 2p¹",           phase="Padat", en="2.04", radius="87",  bp="2550°C",   mp="2076°C"),
+    dict(n=6,  sym="C",  name="Karbon",          cat="nonmetal",   mass="12.01",  period=2, group=14, config="[He] 2s² 2p²",           phase="Padat", en="2.55", radius="67",  bp="3642°C",   mp="3675°C"),
+    dict(n=7,  sym="N",  name="Nitrogen",        cat="nonmetal",   mass="14.01",  period=2, group=15, config="[He] 2s² 2p³",           phase="Gas",   en="3.04", radius="56",  bp="-195.8°C", mp="-210°C"),
+    dict(n=8,  sym="O",  name="Oksigen",         cat="nonmetal",   mass="16.00",  period=2, group=16, config="[He] 2s² 2p⁴",           phase="Gas",   en="3.44", radius="48",  bp="-183°C",   mp="-218.8°C"),
+    dict(n=9,  sym="F",  name="Fluor",           cat="halogen",    mass="19.00",  period=2, group=17, config="[He] 2s² 2p⁵",           phase="Gas",   en="3.98", radius="42",  bp="-188.1°C", mp="-219.6°C"),
+    dict(n=10, sym="Ne", name="Neon",            cat="noble",      mass="20.18",  period=2, group=18, config="[He] 2s² 2p⁶",           phase="Gas",   en="—",    radius="38",  bp="-246.1°C", mp="-248.6°C"),
+    dict(n=11, sym="Na", name="Natrium",         cat="alkali",     mass="22.99",  period=3, group=1,  config="[Ne] 3s¹",               phase="Padat", en="0.93", radius="190", bp="882.9°C",  mp="97.8°C"),
+    dict(n=12, sym="Mg", name="Magnesium",       cat="alkaline",   mass="24.31",  period=3, group=2,  config="[Ne] 3s²",               phase="Padat", en="1.31", radius="145", bp="1090°C",   mp="650°C"),
+    dict(n=13, sym="Al", name="Aluminium",       cat="posttrans",  mass="26.98",  period=3, group=13, config="[Ne] 3s² 3p¹",           phase="Padat", en="1.61", radius="118", bp="2519°C",   mp="660.3°C"),
+    dict(n=14, sym="Si", name="Silikon",         cat="metalloid",  mass="28.09",  period=3, group=14, config="[Ne] 3s² 3p²",           phase="Padat", en="1.90", radius="111", bp="3265°C",   mp="1414°C"),
+    dict(n=15, sym="P",  name="Fosfor",          cat="nonmetal",   mass="30.97",  period=3, group=15, config="[Ne] 3s² 3p³",           phase="Padat", en="2.19", radius="98",  bp="280.5°C",  mp="44.2°C"),
+    dict(n=16, sym="S",  name="Belerang",        cat="nonmetal",   mass="32.06",  period=3, group=16, config="[Ne] 3s² 3p⁴",           phase="Padat", en="2.58", radius="88",  bp="444.6°C",  mp="119.6°C"),
+    dict(n=17, sym="Cl", name="Klorin",          cat="halogen",    mass="35.45",  period=3, group=17, config="[Ne] 3s² 3p⁵",           phase="Gas",   en="3.16", radius="79",  bp="-34.1°C",  mp="-101.5°C"),
+    dict(n=18, sym="Ar", name="Argon",           cat="noble",      mass="39.95",  period=3, group=18, config="[Ne] 3s² 3p⁶",           phase="Gas",   en="—",    radius="71",  bp="-185.9°C", mp="-189.3°C"),
+    dict(n=19, sym="K",  name="Kalium",          cat="alkali",     mass="39.10",  period=4, group=1,  config="[Ar] 4s¹",               phase="Padat", en="0.82", radius="243", bp="759°C",    mp="63.5°C"),
+    dict(n=20, sym="Ca", name="Kalsium",         cat="alkaline",   mass="40.08",  period=4, group=2,  config="[Ar] 4s²",               phase="Padat", en="1.00", radius="194", bp="1484°C",   mp="842°C"),
+    dict(n=21, sym="Sc", name="Skandium",        cat="transition", mass="44.96",  period=4, group=3,  config="[Ar] 3d¹ 4s²",           phase="Padat", en="1.36", radius="184", bp="2836°C",   mp="1541°C"),
+    dict(n=22, sym="Ti", name="Titanium",        cat="transition", mass="47.87",  period=4, group=4,  config="[Ar] 3d² 4s²",           phase="Padat", en="1.54", radius="176", bp="3287°C",   mp="1668°C"),
+    dict(n=23, sym="V",  name="Vanadium",        cat="transition", mass="50.94",  period=4, group=5,  config="[Ar] 3d³ 4s²",           phase="Padat", en="1.63", radius="171", bp="3407°C",   mp="1910°C"),
+    dict(n=24, sym="Cr", name="Kromium",         cat="transition", mass="52.00",  period=4, group=6,  config="[Ar] 3d⁵ 4s¹",           phase="Padat", en="1.66", radius="166", bp="2671°C",   mp="1907°C"),
+    dict(n=25, sym="Mn", name="Mangan",          cat="transition", mass="54.94",  period=4, group=7,  config="[Ar] 3d⁵ 4s²",           phase="Padat", en="1.55", radius="161", bp="2061°C",   mp="1246°C"),
+    dict(n=26, sym="Fe", name="Besi",            cat="transition", mass="55.85",  period=4, group=8,  config="[Ar] 3d⁶ 4s²",           phase="Padat", en="1.83", radius="156", bp="2861°C",   mp="1538°C"),
+    dict(n=27, sym="Co", name="Kobalt",          cat="transition", mass="58.93",  period=4, group=9,  config="[Ar] 3d⁷ 4s²",           phase="Padat", en="1.88", radius="152", bp="2927°C",   mp="1495°C"),
+    dict(n=28, sym="Ni", name="Nikel",           cat="transition", mass="58.69",  period=4, group=10, config="[Ar] 3d⁸ 4s²",           phase="Padat", en="1.91", radius="149", bp="2913°C",   mp="1455°C"),
+    dict(n=29, sym="Cu", name="Tembaga",         cat="transition", mass="63.55",  period=4, group=11, config="[Ar] 3d¹⁰ 4s¹",          phase="Padat", en="1.90", radius="145", bp="2562°C",   mp="1084.6°C"),
+    dict(n=30, sym="Zn", name="Seng",            cat="transition", mass="65.38",  period=4, group=12, config="[Ar] 3d¹⁰ 4s²",          phase="Padat", en="1.65", radius="142", bp="907°C",    mp="419.5°C"),
+    dict(n=31, sym="Ga", name="Galium",          cat="posttrans",  mass="69.72",  period=4, group=13, config="[Ar] 3d¹⁰ 4s² 4p¹",      phase="Padat", en="1.81", radius="136", bp="2229°C",   mp="29.8°C"),
+    dict(n=32, sym="Ge", name="Germanium",       cat="metalloid",  mass="72.63",  period=4, group=14, config="[Ar] 3d¹⁰ 4s² 4p²",      phase="Padat", en="2.01", radius="125", bp="2820°C",   mp="938.3°C"),
+    dict(n=33, sym="As", name="Arsen",           cat="metalloid",  mass="74.92",  period=4, group=15, config="[Ar] 3d¹⁰ 4s² 4p³",      phase="Padat", en="2.18", radius="114", bp="887°C",    mp="817°C"),
+    dict(n=34, sym="Se", name="Selenium",        cat="nonmetal",   mass="78.97",  period=4, group=16, config="[Ar] 3d¹⁰ 4s² 4p⁴",      phase="Padat", en="2.55", radius="103", bp="685°C",    mp="220.8°C"),
+    dict(n=35, sym="Br", name="Brom",            cat="halogen",    mass="79.90",  period=4, group=17, config="[Ar] 3d¹⁰ 4s² 4p⁵",      phase="Cair",  en="2.96", radius="94",  bp="58.8°C",   mp="-7.3°C"),
+    dict(n=36, sym="Kr", name="Kripton",         cat="noble",      mass="83.80",  period=4, group=18, config="[Ar] 3d¹⁰ 4s² 4p⁶",      phase="Gas",   en="3.00", radius="88",  bp="-153.4°C", mp="-157.4°C"),
+    dict(n=37, sym="Rb", name="Rubidium",        cat="alkali",     mass="85.47",  period=5, group=1,  config="[Kr] 5s¹",               phase="Padat", en="0.82", radius="265", bp="688°C",    mp="39.3°C"),
+    dict(n=38, sym="Sr", name="Stronsium",       cat="alkaline",   mass="87.62",  period=5, group=2,  config="[Kr] 5s²",               phase="Padat", en="0.95", radius="219", bp="1377°C",   mp="777°C"),
+    dict(n=39, sym="Y",  name="Itrium",          cat="transition", mass="88.91",  period=5, group=3,  config="[Kr] 4d¹ 5s²",           phase="Padat", en="1.22", radius="212", bp="3345°C",   mp="1526°C"),
+    dict(n=40, sym="Zr", name="Zirkonium",       cat="transition", mass="91.22",  period=5, group=4,  config="[Kr] 4d² 5s²",           phase="Padat", en="1.33", radius="206", bp="4409°C",   mp="1855°C"),
+    dict(n=41, sym="Nb", name="Niobium",         cat="transition", mass="92.91",  period=5, group=5,  config="[Kr] 4d⁴ 5s¹",           phase="Padat", en="1.60", radius="198", bp="4744°C",   mp="2477°C"),
+    dict(n=42, sym="Mo", name="Molibden",        cat="transition", mass="95.96",  period=5, group=6,  config="[Kr] 4d⁵ 5s¹",           phase="Padat", en="2.16", radius="190", bp="4639°C",   mp="2623°C"),
+    dict(n=43, sym="Tc", name="Teknesium",       cat="transition", mass="(98)",   period=5, group=7,  config="[Kr] 4d⁵ 5s²",           phase="Padat", en="1.90", radius="183", bp="4265°C",   mp="2157°C"),
+    dict(n=44, sym="Ru", name="Ruthenium",       cat="transition", mass="101.1",  period=5, group=8,  config="[Kr] 4d⁷ 5s¹",           phase="Padat", en="2.20", radius="178", bp="3900°C",   mp="2334°C"),
+    dict(n=45, sym="Rh", name="Rhodium",         cat="transition", mass="102.9",  period=5, group=9,  config="[Kr] 4d⁸ 5s¹",           phase="Padat", en="2.28", radius="173", bp="3695°C",   mp="1964°C"),
+    dict(n=46, sym="Pd", name="Paladium",        cat="transition", mass="106.4",  period=5, group=10, config="[Kr] 4d¹⁰",              phase="Padat", en="2.20", radius="169", bp="2963°C",   mp="1554.9°C"),
+    dict(n=47, sym="Ag", name="Perak",           cat="transition", mass="107.9",  period=5, group=11, config="[Kr] 4d¹⁰ 5s¹",          phase="Padat", en="1.93", radius="165", bp="2162°C",   mp="961.8°C"),
+    dict(n=48, sym="Cd", name="Kadmium",         cat="transition", mass="112.4",  period=5, group=12, config="[Kr] 4d¹⁰ 5s²",          phase="Padat", en="1.69", radius="161", bp="767°C",    mp="321.1°C"),
+    dict(n=49, sym="In", name="Indium",          cat="posttrans",  mass="114.8",  period=5, group=13, config="[Kr] 4d¹⁰ 5s² 5p¹",      phase="Padat", en="1.78", radius="156", bp="2072°C",   mp="156.6°C"),
+    dict(n=50, sym="Sn", name="Timah",           cat="posttrans",  mass="118.7",  period=5, group=14, config="[Kr] 4d¹⁰ 5s² 5p²",      phase="Padat", en="1.96", radius="145", bp="2602°C",   mp="231.9°C"),
+    dict(n=51, sym="Sb", name="Antimon",         cat="metalloid",  mass="121.8",  period=5, group=15, config="[Kr] 4d¹⁰ 5s² 5p³",      phase="Padat", en="2.05", radius="133", bp="1587°C",   mp="630.6°C"),
+    dict(n=52, sym="Te", name="Telurium",        cat="metalloid",  mass="127.6",  period=5, group=16, config="[Kr] 4d¹⁰ 5s² 5p⁴",      phase="Padat", en="2.10", radius="123", bp="988°C",    mp="449.5°C"),
+    dict(n=53, sym="I",  name="Iodium",          cat="halogen",    mass="126.9",  period=5, group=17, config="[Kr] 4d¹⁰ 5s² 5p⁵",      phase="Padat", en="2.66", radius="115", bp="184.3°C",  mp="113.7°C"),
+    dict(n=54, sym="Xe", name="Xenon",           cat="noble",      mass="131.3",  period=5, group=18, config="[Kr] 4d¹⁰ 5s² 5p⁶",      phase="Gas",   en="2.60", radius="108", bp="-108.1°C", mp="-111.8°C"),
+    dict(n=55, sym="Cs", name="Sesium",          cat="alkali",     mass="132.9",  period=6, group=1,  config="[Xe] 6s¹",               phase="Padat", en="0.79", radius="298", bp="671°C",    mp="28.5°C"),
+    dict(n=56, sym="Ba", name="Barium",          cat="alkaline",   mass="137.3",  period=6, group=2,  config="[Xe] 6s²",               phase="Padat", en="0.89", radius="253", bp="1870°C",   mp="727°C"),
+    dict(n=57, sym="La", name="Lantanum",        cat="lanthanide", mass="138.9",  period=6, group=3,  config="[Xe] 5d¹ 6s²",           phase="Padat", en="1.10", radius="250", bp="3464°C",   mp="918°C"),
+    dict(n=72, sym="Hf", name="Hafnium",         cat="transition", mass="178.5",  period=6, group=4,  config="[Xe] 4f¹⁴ 5d² 6s²",      phase="Padat", en="1.30", radius="208", bp="4600°C",   mp="2233°C"),
+    dict(n=73, sym="Ta", name="Tantalum",        cat="transition", mass="180.9",  period=6, group=5,  config="[Xe] 4f¹⁴ 5d³ 6s²",      phase="Padat", en="1.50", radius="200", bp="5458°C",   mp="3017°C"),
+    dict(n=74, sym="W",  name="Wolfram",         cat="transition", mass="183.8",  period=6, group=6,  config="[Xe] 4f¹⁴ 5d⁴ 6s²",      phase="Padat", en="2.36", radius="193", bp="5555°C",   mp="3422°C"),
+    dict(n=75, sym="Re", name="Renium",          cat="transition", mass="186.2",  period=6, group=7,  config="[Xe] 4f¹⁴ 5d⁵ 6s²",      phase="Padat", en="1.90", radius="188", bp="5596°C",   mp="3186°C"),
+    dict(n=76, sym="Os", name="Osmium",          cat="transition", mass="190.2",  period=6, group=8,  config="[Xe] 4f¹⁴ 5d⁶ 6s²",      phase="Padat", en="2.20", radius="185", bp="5012°C",   mp="3033°C"),
+    dict(n=77, sym="Ir", name="Iridium",         cat="transition", mass="192.2",  period=6, group=9,  config="[Xe] 4f¹⁴ 5d⁷ 6s²",      phase="Padat", en="2.20", radius="180", bp="4428°C",   mp="2446°C"),
+    dict(n=78, sym="Pt", name="Platinum",        cat="transition", mass="195.1",  period=6, group=10, config="[Xe] 4f¹⁴ 5d⁹ 6s¹",      phase="Padat", en="2.28", radius="177", bp="3825°C",   mp="1768.3°C"),
+    dict(n=79, sym="Au", name="Emas",            cat="transition", mass="197.0",  period=6, group=11, config="[Xe] 4f¹⁴ 5d¹⁰ 6s¹",     phase="Padat", en="2.54", radius="174", bp="2856°C",   mp="1064.2°C"),
+    dict(n=80, sym="Hg", name="Raksa",           cat="transition", mass="200.6",  period=6, group=12, config="[Xe] 4f¹⁴ 5d¹⁰ 6s²",     phase="Cair",  en="2.00", radius="171", bp="356.7°C",  mp="-38.8°C"),
+    dict(n=81, sym="Tl", name="Talium",          cat="posttrans",  mass="204.4",  period=6, group=13, config="[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p¹", phase="Padat", en="1.62", radius="156", bp="1473°C",   mp="304°C"),
+    dict(n=82, sym="Pb", name="Timbal",          cat="posttrans",  mass="207.2",  period=6, group=14, config="[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p²", phase="Padat", en="2.33", radius="154", bp="1749°C",   mp="327.5°C"),
+    dict(n=83, sym="Bi", name="Bismut",          cat="posttrans",  mass="209.0",  period=6, group=15, config="[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p³", phase="Padat", en="2.02", radius="143", bp="1564°C",   mp="271.4°C"),
+    dict(n=84, sym="Po", name="Polonium",        cat="posttrans",  mass="(209)",  period=6, group=16, config="[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁴", phase="Padat", en="2.00", radius="135", bp="962°C",    mp="254°C"),
+    dict(n=85, sym="At", name="Astatin",         cat="halogen",    mass="(210)",  period=6, group=17, config="[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁵", phase="Padat", en="2.20", radius="127", bp="337°C",    mp="302°C"),
+    dict(n=86, sym="Rn", name="Radon",           cat="noble",      mass="(222)",  period=6, group=18, config="[Xe] 4f¹⁴ 5d¹⁰ 6s² 6p⁶", phase="Gas",   en="—",    radius="120", bp="-61.7°C",  mp="-71°C"),
+    dict(n=87, sym="Fr", name="Fransium",        cat="alkali",     mass="(223)",  period=7, group=1,  config="[Rn] 7s¹",               phase="Padat", en="0.70", radius="348", bp="677°C",    mp="27°C"),
+    dict(n=88, sym="Ra", name="Radium",          cat="alkaline",   mass="(226)",  period=7, group=2,  config="[Rn] 7s²",               phase="Padat", en="0.90", radius="283", bp="1737°C",   mp="700°C"),
+    dict(n=89, sym="Ac", name="Aktinium",        cat="actinide",   mass="(227)",  period=7, group=3,  config="[Rn] 6d¹ 7s²",           phase="Padat", en="1.10", radius="260", bp="3198°C",   mp="1051°C"),
+    dict(n=104,sym="Rf", name="Rutherfordium",   cat="transition", mass="(267)",  period=7, group=4,  config="[Rn] 5f¹⁴ 6d² 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=105,sym="Db", name="Dubnium",         cat="transition", mass="(268)",  period=7, group=5,  config="[Rn] 5f¹⁴ 6d³ 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=106,sym="Sg", name="Seaborgium",      cat="transition", mass="(271)",  period=7, group=6,  config="[Rn] 5f¹⁴ 6d⁴ 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=107,sym="Bh", name="Bohrium",         cat="transition", mass="(272)",  period=7, group=7,  config="[Rn] 5f¹⁴ 6d⁵ 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=108,sym="Hs", name="Hassium",         cat="transition", mass="(277)",  period=7, group=8,  config="[Rn] 5f¹⁴ 6d⁶ 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=109,sym="Mt", name="Meitnerium",      cat="transition", mass="(276)",  period=7, group=9,  config="[Rn] 5f¹⁴ 6d⁷ 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=110,sym="Ds", name="Darmstadtium",    cat="transition", mass="(281)",  period=7, group=10, config="[Rn] 5f¹⁴ 6d⁸ 7s²",      phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=111,sym="Rg", name="Roentgenium",     cat="transition", mass="(280)",  period=7, group=11, config="[Rn] 5f¹⁴ 6d¹⁰ 7s¹",     phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=112,sym="Cn", name="Kopernikum",      cat="transition", mass="(285)",  period=7, group=12, config="[Rn] 5f¹⁴ 6d¹⁰ 7s²",     phase="Gas",   en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=113,sym="Nh", name="Nihonium",        cat="posttrans",  mass="(284)",  period=7, group=13, config="[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p¹", phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=114,sym="Fl", name="Flerovium",       cat="posttrans",  mass="(289)",  period=7, group=14, config="[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p²", phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=115,sym="Mc", name="Moskovium",       cat="posttrans",  mass="(288)",  period=7, group=15, config="[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p³", phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=116,sym="Lv", name="Livermorium",     cat="posttrans",  mass="(293)",  period=7, group=16, config="[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁴", phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=117,sym="Ts", name="Tennesin",        cat="halogen",    mass="(294)",  period=7, group=17, config="[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁵", phase="Padat", en="—",    radius="—",   bp="—",        mp="—"),
+    dict(n=118,sym="Og", name="Oganesson",       cat="noble",      mass="(294)",  period=7, group=18, config="[Rn] 5f¹⁴ 6d¹⁰ 7s² 7p⁶", phase="Gas",   en="—",    radius="—",   bp="—",        mp="—"),
+    # Lanthanida
+    dict(n=58, sym="Ce", name="Serium",          cat="lanthanide", mass="140.1",  period=8, group=4,  config="[Xe] 4f¹ 5d¹ 6s²",       phase="Padat", en="1.12", radius="247", bp="3433°C",   mp="798°C"),
+    dict(n=59, sym="Pr", name="Praseodimium",    cat="lanthanide", mass="140.9",  period=8, group=5,  config="[Xe] 4f³ 6s²",            phase="Padat", en="1.13", radius="243", bp="3520°C",   mp="931°C"),
+    dict(n=60, sym="Nd", name="Neodimium",       cat="lanthanide", mass="144.2",  period=8, group=6,  config="[Xe] 4f⁴ 6s²",            phase="Padat", en="1.14", radius="242", bp="3074°C",   mp="1021°C"),
+    dict(n=61, sym="Pm", name="Prometium",       cat="lanthanide", mass="(145)",  period=8, group=7,  config="[Xe] 4f⁵ 6s²",            phase="Padat", en="1.13", radius="241", bp="3000°C",   mp="1042°C"),
+    dict(n=62, sym="Sm", name="Samarium",        cat="lanthanide", mass="150.4",  period=8, group=8,  config="[Xe] 4f⁶ 6s²",            phase="Padat", en="1.17", radius="238", bp="1794°C",   mp="1072°C"),
+    dict(n=63, sym="Eu", name="Europium",        cat="lanthanide", mass="152.0",  period=8, group=9,  config="[Xe] 4f⁷ 6s²",            phase="Padat", en="1.20", radius="231", bp="1529°C",   mp="822°C"),
+    dict(n=64, sym="Gd", name="Gadolinium",      cat="lanthanide", mass="157.3",  period=8, group=10, config="[Xe] 4f⁷ 5d¹ 6s²",        phase="Padat", en="1.20", radius="233", bp="3273°C",   mp="1313°C"),
+    dict(n=65, sym="Tb", name="Terbium",         cat="lanthanide", mass="158.9",  period=8, group=11, config="[Xe] 4f⁹ 6s²",            phase="Padat", en="1.10", radius="225", bp="3230°C",   mp="1356°C"),
+    dict(n=66, sym="Dy", name="Disprosium",      cat="lanthanide", mass="162.5",  period=8, group=12, config="[Xe] 4f¹⁰ 6s²",           phase="Padat", en="1.22", radius="228", bp="2567°C",   mp="1412°C"),
+    dict(n=67, sym="Ho", name="Holmium",         cat="lanthanide", mass="164.9",  period=8, group=13, config="[Xe] 4f¹¹ 6s²",           phase="Padat", en="1.23", radius="226", bp="2720°C",   mp="1474°C"),
+    dict(n=68, sym="Er", name="Erbium",          cat="lanthanide", mass="167.3",  period=8, group=14, config="[Xe] 4f¹² 6s²",           phase="Padat", en="1.24", radius="226", bp="2868°C",   mp="1529°C"),
+    dict(n=69, sym="Tm", name="Tulium",          cat="lanthanide", mass="168.9",  period=8, group=15, config="[Xe] 4f¹³ 6s²",           phase="Padat", en="1.25", radius="222", bp="1950°C",   mp="1545°C"),
+    dict(n=70, sym="Yb", name="Iterbium",        cat="lanthanide", mass="173.0",  period=8, group=16, config="[Xe] 4f¹⁴ 6s²",           phase="Padat", en="1.10", radius="222", bp="1196°C",   mp="824°C"),
+    dict(n=71, sym="Lu", name="Lutesium",        cat="lanthanide", mass="175.0",  period=8, group=17, config="[Xe] 4f¹⁴ 5d¹ 6s²",       phase="Padat", en="1.27", radius="217", bp="3402°C",   mp="1663°C"),
+    # Aktinida
+    dict(n=90, sym="Th", name="Thorium",         cat="actinide",   mass="232.0",  period=9, group=4,  config="[Rn] 6d² 7s²",            phase="Padat", en="1.30", radius="237", bp="4788°C",   mp="1750°C"),
+    dict(n=91, sym="Pa", name="Protaktinium",    cat="actinide",   mass="231.0",  period=9, group=5,  config="[Rn] 5f² 6d¹ 7s²",        phase="Padat", en="1.50", radius="—",   bp="4027°C",   mp="1572°C"),
+    dict(n=92, sym="U",  name="Uranium",         cat="actinide",   mass="238.0",  period=9, group=6,  config="[Rn] 5f³ 6d¹ 7s²",        phase="Padat", en="1.38", radius="175", bp="4131°C",   mp="1135°C"),
+    dict(n=93, sym="Np", name="Neptunium",       cat="actinide",   mass="(237)",  period=9, group=7,  config="[Rn] 5f⁴ 6d¹ 7s²",        phase="Padat", en="1.36", radius="—",   bp="4000°C",   mp="644°C"),
+    dict(n=94, sym="Pu", name="Plutonium",       cat="actinide",   mass="(244)",  period=9, group=8,  config="[Rn] 5f⁶ 7s²",            phase="Padat", en="1.28", radius="—",   bp="3228°C",   mp="640°C"),
+    dict(n=95, sym="Am", name="Amerisium",       cat="actinide",   mass="(243)",  period=9, group=9,  config="[Rn] 5f⁷ 7s²",            phase="Padat", en="1.30", radius="—",   bp="2011°C",   mp="1176°C"),
+    dict(n=96, sym="Cm", name="Kurium",          cat="actinide",   mass="(247)",  period=9, group=10, config="[Rn] 5f⁷ 6d¹ 7s²",        phase="Padat", en="1.30", radius="—",   bp="3110°C",   mp="1345°C"),
+    dict(n=97, sym="Bk", name="Berkelium",       cat="actinide",   mass="(247)",  period=9, group=11, config="[Rn] 5f⁹ 7s²",            phase="Padat", en="1.30", radius="—",   bp="—",        mp="986°C"),
+    dict(n=98, sym="Cf", name="Kalifornium",     cat="actinide",   mass="(251)",  period=9, group=12, config="[Rn] 5f¹⁰ 7s²",           phase="Padat", en="1.30", radius="—",   bp="—",        mp="900°C"),
+    dict(n=99, sym="Es", name="Einsteinium",     cat="actinide",   mass="(252)",  period=9, group=13, config="[Rn] 5f¹¹ 7s²",           phase="Padat", en="1.30", radius="—",   bp="—",        mp="860°C"),
+    dict(n=100,sym="Fm", name="Fermium",         cat="actinide",   mass="(257)",  period=9, group=14, config="[Rn] 5f¹² 7s²",           phase="Padat", en="1.30", radius="—",   bp="—",        mp="1527°C"),
+    dict(n=101,sym="Md", name="Mendelevium",     cat="actinide",   mass="(258)",  period=9, group=15, config="[Rn] 5f¹³ 7s²",           phase="Padat", en="1.30", radius="—",   bp="—",        mp="827°C"),
+    dict(n=102,sym="No", name="Nobelium",        cat="actinide",   mass="(259)",  period=9, group=16, config="[Rn] 5f¹⁴ 7s²",           phase="Padat", en="1.30", radius="—",   bp="—",        mp="827°C"),
+    dict(n=103,sym="Lr", name="Lawrensium",      cat="actinide",   mass="(262)",  period=9, group=17, config="[Rn] 5f¹⁴ 7s² 7p¹",       phase="Padat", en="1.30", radius="—",   bp="—",        mp="1627°C"),
 ]
 
-# ============================================================
-# KONFIGURASI WARNA & NAMA GOLONGAN
-# ============================================================
-GROUP_COLORS = {
-    "1A": "#ef5350",   # Merah  - Alkali
-    "2A": "#ff7043",   # Oranye - Alkali Tanah
-    "3B": "#bababa",   # Silver - Logam Transisi
-    "3A": "#fdd835",   # Kuning - Boron
-    "4A": "#66bb6a",   # Hijau  - Karbon
-    "5A": "#29b6f6",   # Biru   - Nitrogen
-    "6A": "#ab47bc",   # Ungu   - Kalkogen
-    "7A": "#26c6da",   # Cyan   - Halogen
-    "8A": "#78909c",   # Abu    - Gas Mulia
-}
-GROUP_TEXT_COLORS = {
-    "1A": "#fff", "2A": "#fff", "3A": "#222", "3B": "#222",
-    "4A": "#fff", "5A": "#fff", "6A": "#fff",
-    "7A": "#fff", "8A": "#fff",
-}
-GROUP_NAMES = {
-    "1A": "Logam Alkali",
-    "2A": "Logam Alkali Tanah",
-    "3A": "Golongan Boron",
-    "3B": "Logam Transisi",
-    "4A": "Golongan Karbon",
-    "5A": "Golongan Nitrogen",
-    "6A": "Kalkogen",
-    "7A": "Halogen",
-    "8A": "Gas Mulia",
+CAT_INFO = {
+    "alkali":     {"label": "Logam Alkali",         "bg": "#FAEEDA", "color": "#633806", "border": "#EF9F27"},
+    "alkaline":   {"label": "Logam Alkali Tanah",   "bg": "#FAC775", "color": "#633806", "border": "#EF9F27"},
+    "transition": {"label": "Logam Transisi",       "bg": "#E6F1FB", "color": "#0C447C", "border": "#85B7EB"},
+    "posttrans":  {"label": "Logam Pasca-Transisi", "bg": "#EEEDFE", "color": "#3C3489", "border": "#AFA9EC"},
+    "metalloid":  {"label": "Metaloid",             "bg": "#EAF3DE", "color": "#3B6D11", "border": "#97C459"},
+    "nonmetal":   {"label": "Non-Logam",            "bg": "#E1F5EE", "color": "#0F6E56", "border": "#5DCAA5"},
+    "halogen":    {"label": "Halogen",              "bg": "#FBEAF0", "color": "#72243E", "border": "#ED93B1"},
+    "noble":      {"label": "Gas Mulia",            "bg": "#FAECE7", "color": "#712B13", "border": "#F0997B"},
+    "lanthanide": {"label": "Lantanida",            "bg": "#FCEBEB", "color": "#791F1F", "border": "#F09595"},
+    "actinide":   {"label": "Aktinida",             "bg": "#F1EFE8", "color": "#444441", "border": "#B4B2A9"},
 }
 
-GROUPS  = ["1A", "2A", "3A", "3B", "4A", "5A", "6A", "7A", "8A"]
-PERIODS = [1, 2, 3, 4, 5, 6, 7]
+EL_BY_SYM = {e["sym"]: e for e in ELEMENTS}
 
-# Build lookup dict  {(period, group): element}
-elem_by_pos = {(e["period"], e["group"]): e for e in ELEMENTS}
 
-# ============================================================
-# CSS GLOBAL
-# ============================================================
-st.markdown("""
+def build_full_html(elements, cat_info):
+    el_json = json.dumps({e["sym"]: e for e in elements})
+    cat_json = json.dumps(cat_info)
+
+    by_pos = {}
+    for e in elements:
+        by_pos[(e["period"], e["group"])] = e
+
+    def tile(e):
+        info = cat_info[e["cat"]]
+        # Truncate name to fit tile (max ~8 chars looks good at tiny font)
+        nm = e["name"][:8] + "…" if len(e["name"]) > 9 else e["name"]
+        return (
+            f'<div class="el" '
+            f'style="background:{info["bg"]};border-color:{info["border"]};color:{info["color"]};" '
+            f'onclick="selectEl(\'{e["sym"]}\')" '
+            f'title="{e["name"]} ({e["sym"]})">'
+            f'<span class="en">{e["n"]}</span>'
+            f'<span class="sy">{e["sym"]}</span>'
+            f'<span class="nm">{nm}</span>'
+            f'</div>'
+        )
+
+    def empty():
+        return '<div class="el empty"></div>'
+
+    rows = []
+    for period in range(1, 8):
+        for group in range(1, 19):
+            e = by_pos.get((period, group))
+            rows.append(tile(e) if e else empty())
+
+    lant_nums = list(range(57, 72))
+    act_nums  = list(range(89, 104))
+
+    lant_tiles = [empty(), empty(), empty()]
+    for n in lant_nums:
+        e = next((x for x in elements if x["n"] == n), None)
+        lant_tiles.append(tile(e) if e else empty())
+    lant_tiles += [empty()] * (18 - len(lant_tiles))
+
+    act_tiles = [empty(), empty(), empty()]
+    for n in act_nums:
+        e = next((x for x in elements if x["n"] == n), None)
+        act_tiles.append(tile(e) if e else empty())
+    act_tiles += [empty()] * (18 - len(act_tiles))
+
+    grid_html = "".join(rows)
+    lant_html = "".join(lant_tiles)
+    act_html  = "".join(act_tiles)
+
+    legend_items = "".join(
+        f'<span class="leg"><span class="ldot" style="background:{v["bg"]};border:1px solid {v["border"]}"></span>{v["label"]}</span>'
+        for v in cat_info.values()
+    )
+
+    html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@400;600;700;900&family=Source+Code+Pro:wght@400;600&display=swap');
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: system-ui, sans-serif; padding: 10px; background: transparent; }}
 
-html, body, [class*="css"] {
-    font-family: 'Exo 2', sans-serif;
-}
-.block-container { padding-top: 1.5rem !important; }
+  h1 {{ font-size: 18px; font-weight: 600; margin-bottom: 3px; color: #111; }}
+  p.sub {{ font-size: 12px; color: #888; margin-bottom: 8px; }}
 
-/* ---- HEADER ---- */
-.pt-header {
-    text-align: center;
-    padding: 28px 20px 10px;
-    background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 60%, #142535 100%);
-    border-radius: 16px;
-    margin-bottom: 24px;
-}
-.pt-title {
-    font-size: 2.6rem;
-    font-weight: 900;
-    letter-spacing: 2px;
-    color: #e0f7fa;
-    text-shadow: 0 0 30px #29b6f655;
-    margin: 0;
-}
-.pt-subtitle {
-    color: #90caf9;
-    font-size: 1rem;
-    margin-top: 6px;
-    letter-spacing: 1px;
-}
+  .legend {{ display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }}
+  .leg {{ display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; color: #555;
+          padding: 2px 7px; border-radius: 4px; border: 0.5px solid #ddd; background: #fafafa; }}
+  .ldot {{ width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }}
 
-/* ---- LEGENDA ---- */
-.legend-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
-.legend-chip {
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-}
+  .pt-wrap {{ overflow-x: auto; }}
+  .grid {{
+    display: grid;
+    grid-template-columns: repeat(18, minmax(0, 1fr));
+    gap: 2px;
+    min-width: 700px;
+  }}
+  .section-label {{
+    grid-column: 1 / -1;
+    font-size: 10px; color: #aaa; font-style: italic; padding: 5px 0 1px;
+  }}
 
-/* ---- TABEL PERIODIK ---- */
-.pt-table { border-collapse: separate; border-spacing: 5px; width: 100%; }
-.pt-table th {
-    background: #1e2d40;
-    color: #90caf9;
-    text-align: center;
-    font-size: 0.82rem;
-    font-weight: 700;
-    padding: 7px 4px;
-    border-radius: 6px;
-    letter-spacing: 1px;
-}
-.pt-table td { vertical-align: middle; }
-.period-lbl {
-    background: #1e2d40;
-    color: #78909c;
-    font-weight: 700;
-    font-size: 0.78rem;
-    text-align: center;
-    padding: 6px 8px;
-    border-radius: 6px;
-    white-space: nowrap;
-}
-.elem-box {
-    border-radius: 10px;
-    padding: 7px 4px;
-    width: 82px;
-    min-height: 72px;
-    display: inline-flex;
+  /* ── Element tile ── */
+  .el {{
+    position: relative;
+    aspect-ratio: 1;
+    min-height: 0;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 0;
+    cursor: pointer;
+    padding: 3px 2px 2px;
+    transition: transform .12s, box-shadow .12s;
+    user-select: none;
+    overflow: hidden;
+  }}
+  .el:hover {{
+    transform: scale(1.22);
+    z-index: 20;
+    box-shadow: 0 4px 14px rgba(0,0,0,.20);
+  }}
+  .el.active {{
+    outline: 2.5px solid #378ADD;
+    outline-offset: 1px;
+    transform: scale(1.12);
+    z-index: 15;
+  }}
+  .el.empty {{
+    background: transparent !important;
+    border: none !important;
     cursor: default;
-    transition: transform 0.15s, box-shadow 0.15s;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
-}
-.elem-box:hover {
-    transform: translateY(-3px) scale(1.06);
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-    z-index: 10;
-    position: relative;
-}
-.e-num  { font-size: 0.65rem; font-weight: 600; opacity: 0.75; margin-bottom: 1px; }
-.e-sym  { font-size: 1.5rem; font-weight: 900; line-height: 1.1; letter-spacing: -0.5px; }
-.e-name { font-size: 0.55rem; font-weight: 600; opacity: 0.82; margin-top: 2px; }
-.e-mass { font-size: 0.55rem; opacity: 0.70; font-family: 'Source Code Pro', monospace; }
+    pointer-events: none;
+  }}
 
-/* ---- KARTU DETAIL ---- */
-.detail-card {
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 16px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
-}
-.dc-symbol { font-size: 5rem; font-weight: 900; line-height: 1; text-shadow: 0 2px 12px rgba(0,0,0,0.2); }
-.dc-name   { font-size: 1.5rem; font-weight: 700; margin-top: 4px; }
-.dc-badge  {
-    display: inline-block;
-    background: rgba(255,255,255,0.25);
-    border-radius: 20px;
-    padding: 3px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    margin-top: 8px;
-}
-.info-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
-.info-chip {
-    background: rgba(255,255,255,0.2);
-    border-radius: 10px;
-    padding: 10px 12px;
-    backdrop-filter: blur(4px);
-}
-.ic-label { font-size: 0.65rem; font-weight: 600; opacity: 0.75; margin-bottom: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
-.ic-value { font-size: 0.9rem; font-weight: 700; font-family: 'Source Code Pro', monospace; }
-
-/* ---- TABEL DATA ---- */
-.stDataFrame { border-radius: 10px; overflow: hidden; }
-
-/* ---- FOOTER ---- */
-.pt-footer {
+  /* text inside tile — sized relative to the tile itself */
+  .en {{
+    font-size: clamp(5px, .55vw, 8px);
+    line-height: 1;
+    align-self: flex-start;
+    padding-left: 2px;
+    opacity: .65;
+    flex-shrink: 0;
+  }}
+  .sy {{
+    font-size: clamp(9px, 1.1vw, 15px);
+    font-weight: 700;
+    line-height: 1.05;
+    flex-shrink: 0;
+  }}
+  .nm {{
+    font-size: clamp(4px, .42vw, 6.5px);
+    opacity: .75;
     text-align: center;
-    color: #546e7a;
-    font-size: 0.78rem;
-    padding: 16px;
-    margin-top: 20px;
-    border-top: 1px solid #1e2d40;
-}
+    line-height: 1.1;
+    max-width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 1px;
+    flex-shrink: 0;
+  }}
+
+  /* ── Detail panel (inline, below table) ── */
+  #panel {{
+    display: none;
+    margin-top: 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    background: #fff;
+    box-shadow: 0 2px 14px rgba(0,0,0,.08);
+    animation: fadeUp .18s ease;
+  }}
+  @keyframes fadeUp {{ from {{ opacity:0; transform:translateY(5px); }} to {{ opacity:1; transform:none; }} }}
+  #panel.visible {{ display: block; }}
+
+  .p-header {{ display: flex; align-items: flex-start; gap: 16px; margin-bottom: 16px; }}
+  .p-badge {{
+    width: 68px; height: 68px; border-radius: 12px; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 2px solid;
+  }}
+  .p-sym {{ font-size: 28px; font-weight: 700; line-height: 1; }}
+  .p-num {{ font-size: 11px; opacity: .6; }}
+  .p-name {{ font-size: 20px; font-weight: 600; color: #111; }}
+  .p-cat  {{ font-size: 12px; color: #888; margin-top: 3px; }}
+
+  .stats {{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+  }}
+  .sbox {{ background: #f6f6f6; border-radius: 9px; padding: 10px 13px; }}
+  .slabel {{ font-size: 10.5px; color: #888; margin-bottom: 3px; }}
+  .sval   {{ font-size: 14px; font-weight: 600; color: #111; }}
+
+  .config {{ font-size: 12.5px; color: #666; }}
+  .config code {{ background: #eee; padding: 2px 8px; border-radius: 4px; font-size: 12.5px; color: #333; }}
+
+  .close-btn {{
+    float: right; cursor: pointer; font-size: 11px; color: #999;
+    border: 0.5px solid #ddd; border-radius: 5px; padding: 3px 9px;
+    background: transparent;
+  }}
+  .close-btn:hover {{ background: #f0f0f0; color: #333; }}
 </style>
-""", unsafe_allow_html=True)
+</head>
+<body>
 
-# ============================================================
-# HEADER
-# ============================================================
-st.markdown("""
-<div class="pt-header">
-    <div class="pt-title">⚗️ TABEL PERIODIK UNSUR KIMIA</div>
-    <div class="pt-subtitle">Golongan 1A – 8A &nbsp;|&nbsp; Golongan Utama (Main Group Elements)</div>
+<h1>⚛️ Tabel Periodik Kimia</h1>
+<p class="sub">Klik elemen di tabel untuk melihat informasi lengkapnya.</p>
+
+<div class="legend">{legend_items}</div>
+
+<div class="pt-wrap">
+  <div class="grid">
+    {grid_html}
+  </div>
+  <div class="grid" style="margin-top:3px">
+    <div class="section-label">Lantanida (57–71)</div>
+    {lant_html}
+  </div>
+  <div class="grid" style="margin-top:1px">
+    <div class="section-label">Aktinida (89–103)</div>
+    {act_html}
+  </div>
 </div>
-""", unsafe_allow_html=True)
 
-# ============================================================
-# LEGENDA
-# ============================================================
-st.markdown("#### 🎨 Legenda Golongan")
-legend_html = '<div class="legend-wrap">'
-for g, gname in GROUP_NAMES.items():
-    bg  = GROUP_COLORS[g]
-    txt = GROUP_TEXT_COLORS[g]
-    legend_html += f'<span class="legend-chip" style="background:{bg};color:{txt};">{g} — {gname}</span>'
-legend_html += "</div>"
-st.markdown(legend_html, unsafe_allow_html=True)
-
-# ============================================================
-# TABEL PERIODIK VISUAL
-# ============================================================
-st.markdown("#### 🗂️ Tampilan Tabel Periodik")
-
-html = '<table class="pt-table"><thead><tr><th>Period</th>'
-for g in GROUPS:
-    html += f"<th>{g}</th>"
-html += "</tr></thead><tbody>"
-
-for p in PERIODS:
-    html += f'<tr><td><div class="period-lbl">P {p}</div></td>'
-    for g in GROUPS:
-        elem = elem_by_pos.get((p, g))
-        if elem:
-            bg  = GROUP_COLORS[g]
-            txt = GROUP_TEXT_COLORS[g]
-            html += f"""
-            <td>
-              <div class="elem-box" style="background:{bg};color:{txt};"
-                   title="{elem['name']} | No.Atom: {elem['atomic_number']} | Massa: {elem['atomic_mass']} u">
-                <div class="e-num">{elem['atomic_number']}</div>
-                <div class="e-sym">{elem['symbol']}</div>
-                <div class="e-name">{elem['name']}</div>
-                <div class="e-mass">{elem['atomic_mass']}</div>
-              </div>
-            </td>"""
-        else:
-            html += '<td></td>'
-    html += "</tr>"
-
-html += "</tbody></table>"
-st.markdown(html, unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ============================================================
-# DETAIL UNSUR
-# ============================================================
-st.markdown("#### 🔍 Detail Unsur")
-
-col_sel, col_detail = st.columns([1, 2], gap="large")
-
-with col_sel:
-    sel_group = st.selectbox("🔬 Pilih Golongan:", GROUPS,
-                              format_func=lambda g: f"{g} — {GROUP_NAMES[g]}")
-    grp_elems  = [e for e in ELEMENTS if e["group"] == sel_group]
-    elem_labels = [f"{e['symbol']}  ({e['name']})" for e in grp_elems]
-    sel_idx = st.selectbox("⚛️ Pilih Unsur:", range(len(elem_labels)),
-                            format_func=lambda i: elem_labels[i])
-    el = grp_elems[sel_idx]
-    
-    # Mini info tambahan
-    st.info(f"**Periode:** {el['period']}  |  **Nomor Atom:** {el['atomic_number']}")
-
-with col_detail:
-    bg  = GROUP_COLORS[el["group"]]
-    txt = GROUP_TEXT_COLORS[el["group"]]
-    gn  = GROUP_NAMES[el["group"]]
-
-    card = f"""
-    <div class="detail-card" style="background:linear-gradient(135deg,{bg}dd,{bg}99);color:{txt};">
-      <div style="text-align:center;margin-bottom:14px;">
-        <div class="dc-symbol">{el['symbol']}</div>
-        <div class="dc-name">{el['name']}</div>
-        <div class="dc-badge">{el['group']} &bull; {gn} &bull; Periode {el['period']}</div>
-      </div>
-      <div class="info-grid2">
-        <div class="info-chip">
-          <div class="ic-label">⚛️ Nomor Atom</div>
-          <div class="ic-value">{el['atomic_number']}</div>
-        </div>
-        <div class="info-chip">
-          <div class="ic-label">⚖️ Massa Atom</div>
-          <div class="ic-value">{el['atomic_mass']} u</div>
-        </div>
-        <div class="info-chip">
-          <div class="ic-label">🌡️ Titik Didih</div>
-          <div class="ic-value">{el['boiling_point']} °C</div>
-        </div>
-        <div class="info-chip">
-          <div class="ic-label">❄️ Titik Leleh</div>
-          <div class="ic-value">{el['melting_point']} °C</div>
-        </div>
-        <div class="info-chip">
-          <div class="ic-label">⚗️ Massa Jenis</div>
-          <div class="ic-value">{el['density']} g/cm³</div>
-        </div>
-        <div class="info-chip">
-          <div class="ic-label">⚡ Tingkat Oksidasi</div>
-          <div class="ic-value" style="font-size:0.78rem;">{el['oxidation_states']}</div>
-        </div>
-        <div class="info-chip" style="grid-column: span 2;">
-          <div class="ic-label">🔬 Struktur Elektron (Konfigurasi)</div>
-          <div class="ic-value">{el['electron_config']}</div>
-        </div>
-      </div>
+<div id="panel">
+  <button class="close-btn" onclick="closePanel()">✕ tutup</button>
+  <div class="p-header">
+    <div class="p-badge" id="p-badge">
+      <span class="p-sym" id="p-sym"></span>
+      <span class="p-num" id="p-num"></span>
     </div>
-    """
-    st.markdown(card, unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ============================================================
-# TABEL DATA LENGKAP
-# ============================================================
-st.markdown("#### 📊 Tabel Data Lengkap Semua Unsur")
-
-filter_groups = st.multiselect(
-    "Filter berdasarkan Golongan:",
-    options=GROUPS,
-    default=GROUPS,
-    format_func=lambda g: f"{g} ({GROUP_NAMES[g]})"
-)
-
-filtered = [e for e in ELEMENTS if e["group"] in filter_groups]
-df = pd.DataFrame(filtered)
-df = df.rename(columns={
-    "symbol":           "Lambang",
-    "name":             "Nama Unsur",
-    "atomic_number":    "No. Atom",
-    "group":            "Golongan",
-    "period":           "Periode",
-    "atomic_mass":      "Massa Atom (u)",
-    "boiling_point":    "Titik Didih (°C)",
-    "melting_point":    "Titik Leleh (°C)",
-    "density":          "Massa Jenis (g/cm³)",
-    "oxidation_states": "Tingkat Oksidasi",
-    "electron_config":  "Struktur Elektron",
-})
-df = df[["No. Atom", "Lambang", "Nama Unsur", "Golongan", "Periode",
-         "Massa Atom (u)", "Titik Didih (°C)", "Titik Leleh (°C)",
-         "Massa Jenis (g/cm³)", "Tingkat Oksidasi", "Struktur Elektron"]]
-df = df.sort_values("No. Atom").reset_index(drop=True)
-
-st.dataframe(df, use_container_width=True, height=430)
-
-csv_data = df.to_csv(index=False).encode("utf-8")
-st.download_button(
-    label="⬇️ Unduh Data sebagai CSV",
-    data=csv_data,
-    file_name="tabel_periodik_golongan_A.csv",
-    mime="text/csv"
-)
-
-# ============================================================
-# FOOTER
-# ============================================================
-st.markdown("""
-<div class="pt-footer">
-    ⚗️ Tabel Periodik Golongan Utama (1A – 8A) &nbsp;|&nbsp; Data berdasarkan IUPAC &nbsp;|&nbsp;
-    Dibuat dengan Streamlit & Python
+    <div>
+      <div class="p-name" id="p-name"></div>
+      <div class="p-cat"  id="p-cat"></div>
+    </div>
+  </div>
+  <div class="stats" id="p-stats"></div>
+  <div class="config" id="p-config"></div>
 </div>
-""", unsafe_allow_html=True)
+
+<script>
+const ELEMENTS = {el_json};
+const CAT_INFO  = {cat_json};
+
+function selectEl(sym) {{
+  const e = ELEMENTS[sym];
+  if (!e) return;
+
+  document.querySelectorAll('.el.active').forEach(d => d.classList.remove('active'));
+  document.querySelectorAll('.el[onclick]').forEach(d => {{
+    if (d.getAttribute('onclick') === `selectEl('${{sym}}')`) d.classList.add('active');
+  }});
+
+  const info = CAT_INFO[e.cat];
+  const badge = document.getElementById('p-badge');
+  badge.style.background  = info.bg;
+  badge.style.borderColor = info.border;
+  document.getElementById('p-sym').textContent = e.sym;
+  document.getElementById('p-sym').style.color = info.color;
+  document.getElementById('p-num').textContent = e.n;
+  document.getElementById('p-num').style.color = info.color;
+  document.getElementById('p-name').textContent = e.name;
+  document.getElementById('p-cat').textContent  = info.label + ' · Fase: ' + e.phase;
+
+  document.getElementById('p-stats').innerHTML = `
+    <div class="sbox"><div class="slabel">⚖️ Massa Atom</div><div class="sval">${{e.mass}} u</div></div>
+    <div class="sbox"><div class="slabel">⚡ Elektronegativitas</div><div class="sval">${{e.en}}</div></div>
+    <div class="sbox"><div class="slabel">🔴 Jari-jari Atom</div><div class="sval">${{e.radius}} pm</div></div>
+    <div class="sbox"><div class="slabel">🔥 Titik Lebur</div><div class="sval">${{e.mp}}</div></div>
+    <div class="sbox"><div class="slabel">💧 Titik Didih</div><div class="sval">${{e.bp}}</div></div>
+    <div class="sbox"><div class="slabel">📌 Periode / Golongan</div><div class="sval">${{e.period}} / ${{e.group}}</div></div>
+  `;
+  document.getElementById('p-config').innerHTML =
+    '🧬 Konfigurasi Elektron: <code>' + e.config + '</code>';
+
+  const panel = document.getElementById('panel');
+  panel.classList.add('visible');
+  panel.scrollIntoView({{ behavior: 'smooth', block: 'nearest' }});
+}}
+
+function closePanel() {{
+  document.getElementById('panel').classList.remove('visible');
+  document.querySelectorAll('.el.active').forEach(d => d.classList.remove('active'));
+}}
+
+// Terima perintah dari sidebar iframe
+window.addEventListener('message', function(event) {{
+  if (event.data && event.data.type === 'selectEl') {{
+    selectEl(event.data.sym);
+  }}
+}});
+</script>
+</body>
+</html>"""
+    return html
+
+
+def main():
+    # Sidebar: search + klik elemen → kirim pesan ke iframe via JS postMessage
+    with st.sidebar:
+        st.markdown("### 🔍 Cari Elemen")
+        query = st.text_input("Nama atau simbol", placeholder="Contoh: Emas / Au")
+        candidates = sorted(ELEMENTS, key=lambda x: x["n"])
+        if query:
+            candidates = [e for e in candidates
+                          if query.lower() in e["name"].lower() or query.lower() in e["sym"].lower()]
+        st.markdown(f"**{len(candidates)} elemen**")
+
+        # Render tombol elemen — klik akan memanggil selectEl di dalam iframe
+        buttons_html = ""
+        for e in candidates:
+            info = CAT_INFO[e["cat"]]
+            buttons_html += (
+                f'<div class="sb-el" '
+                f'style="background:{info["bg"]};border:1px solid {info["border"]};color:{info["color"]};" '
+                f'onclick="triggerEl(\'{e["sym"]}\')">'
+                f'<b>{e["sym"]}</b> — {e["name"]}'
+                f'</div>'
+            )
+
+        sidebar_html = f"""
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+  body {{ font-family: system-ui, sans-serif; background: transparent; }}
+  .sb-el {{
+    border-radius: 6px;
+    padding: 6px 10px;
+    margin-bottom: 5px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: opacity .15s, transform .1s;
+    user-select: none;
+  }}
+  .sb-el:hover {{ opacity: .8; transform: translateX(2px); }}
+</style>
+</head>
+<body>
+{buttons_html}
+<script>
+function triggerEl(sym) {{
+  // Kirim pesan ke iframe tabel periodik di halaman utama
+  const iframes = window.parent.document.querySelectorAll('iframe');
+  iframes.forEach(function(iframe) {{
+    try {{
+      iframe.contentWindow.postMessage({{ type: 'selectEl', sym: sym }}, '*');
+    }} catch(e) {{}}
+  }});
+}}
+</script>
+</body>
+</html>"""
+
+        # Hitung tinggi: 37px per item, min 50px
+        sidebar_height = max(50, len(candidates) * 37)
+        components.html(sidebar_html, height=sidebar_height, scrolling=True)
+
+    # Tampilan utama: tabel + panel detail inline
+    html_content = build_full_html(ELEMENTS, CAT_INFO)
+    components.html(html_content, height=900, scrolling=True)
+
+
+if __name__ == "__main__":
+    main()
