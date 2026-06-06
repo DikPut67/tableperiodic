@@ -507,34 +507,6 @@ function triggerEl(sym) {{
 if __name__ == "__main__":
     main()
 
-# ──────────────────────────────────────────────
-# DATA
-# ──────────────────────────────────────────────
-
-ELEMENT_INFO = {
-    "O":  {"nama": "Oksigen",    "nomor": 8,  "massa": 15.999, "golongan": "Non-Logam"},
-    "C":  {"nama": "Karbon",     "nomor": 6,  "massa": 12.011, "golongan": "Non-Logam"},
-    "H":  {"nama": "Hidrogen",   "nomor": 1,  "massa": 1.008,  "golongan": "Non-Logam"},
-    "N":  {"nama": "Nitrogen",   "nomor": 7,  "massa": 14.007, "golongan": "Non-Logam"},
-    "Ca": {"nama": "Kalsium",    "nomor": 20, "massa": 40.078, "golongan": "Logam Alkali Tanah"},
-    "P":  {"nama": "Fosfor",     "nomor": 15, "massa": 30.974, "golongan": "Non-Logam"},
-    "K":  {"nama": "Kalium",     "nomor": 19, "massa": 39.098, "golongan": "Logam Alkali"},
-    "S":  {"nama": "Sulfur",     "nomor": 16, "massa": 32.06,  "golongan": "Non-Logam"},
-    "Na": {"nama": "Natrium",    "nomor": 11, "massa": 22.990, "golongan": "Logam Alkali"},
-    "Cl": {"nama": "Klorin",     "nomor": 17, "massa": 35.45,  "golongan": "Halogen"},
-    "Mg": {"nama": "Magnesium",  "nomor": 12, "massa": 24.305, "golongan": "Logam Alkali Tanah"},
-    "Fe": {"nama": "Besi",       "nomor": 26, "massa": 55.845, "golongan": "Logam Transisi"},
-    "Zn": {"nama": "Seng",       "nomor": 30, "massa": 65.38,  "golongan": "Logam Transisi"},
-    "I":  {"nama": "Iodin",      "nomor": 53, "massa": 126.90, "golongan": "Halogen"},
-    "F":  {"nama": "Fluor",      "nomor": 9,  "massa": 18.998, "golongan": "Halogen"},
-    "Si": {"nama": "Silikon",    "nomor": 14, "massa": 28.085, "golongan": "Metaloid"},
-    "Al": {"nama": "Aluminium",  "nomor": 13, "massa": 26.982, "golongan": "Logam Pasca-Transisi"},
-    "Cr": {"nama": "Kromium",    "nomor": 24, "massa": 51.996, "golongan": "Logam Transisi"},
-    "Ni": {"nama": "Nikel",      "nomor": 28, "massa": 58.693, "golongan": "Logam Transisi"},
-    "Cu": {"nama": "Tembaga",    "nomor": 29, "massa": 63.546, "golongan": "Logam Transisi"},
-    "Sn": {"nama": "Timah",      "nomor": 50, "massa": 118.71, "golongan": "Logam Pasca-Transisi"},
-}
-
 BAGIAN_TUBUH = {
     "🦴 Tulang & Gigi": {
         "deskripsi": "Tulang dan gigi adalah jaringan keras utama dalam tubuh manusia yang berfungsi sebagai penyangga, pelindung organ vital, dan tempat produksi sel darah.",
